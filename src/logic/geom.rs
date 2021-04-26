@@ -1,3 +1,4 @@
+use std::{f32::consts::PI};
 pub use cgmath::prelude::*;
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Pos3 = cgmath::Point3<f32>;
@@ -13,6 +14,14 @@ pub struct Sphere {
 pub struct Plane {
     pub n: Vec3,
     pub d: f32,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Block {
+    pub pos_vertex: Vec3,
+    pub W: f32,
+    pub H: f32,
+    pub L: f32,
 }
 
 /// Are s1 and s2 touching?
