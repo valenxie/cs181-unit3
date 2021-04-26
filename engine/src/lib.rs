@@ -1,5 +1,4 @@
 use std::{error::Error};
-use pixels::{Pixels, SurfaceTexture};
 use wgpu::SwapChainError;
 
 use winit::{event::WindowEvent, platform::run_return::EventLoopExtRunReturn};
@@ -17,8 +16,8 @@ pub mod audio;
 const DT: f64 = 1.0 / 60.0;
 
 pub fn run<Rule, State>(
-    screen_width: usize,
-    screen_height: usize,
+    _screen_width: usize,
+    _screen_height: usize,
     window_builder: WindowBuilder,
     rsrc: Resources,
     mut rules: Rule,
@@ -37,11 +36,6 @@ pub fn run<Rule, State>(
 
     // Since main can't be async, we're going to need to block
     let mut render_target = match graphics_method {
-        GraphicsMethod::Cpu => GraphicalDisplay::Cpu({
-            let window_size = window.inner_size();
-            let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
-            Pixels::new(screen_width as u32, screen_height as u32, surface_texture).unwrap()
-        }),
         _ => GraphicalDisplay::Gpu(block_on(GpuState::new(&window, graphics_method))),
     };
     
@@ -59,7 +53,6 @@ pub fn run<Rule, State>(
                 window_id,
             } if window_id == window.id() => {
                 match &mut render_target {
-                    GraphicalDisplay::Cpu(_) => {},
                     GraphicalDisplay::Gpu(gpu_state) => {
                         match event {
                             WindowEvent::Resized(physical_size) => {

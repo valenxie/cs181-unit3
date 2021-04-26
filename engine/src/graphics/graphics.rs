@@ -1,6 +1,5 @@
 use std::{error::Error, rc::Rc};
 
-use pixels::{Pixels};
 use wgpu::{BindGroupLayout, BlendFactor, BlendOperation, BlendState, CommandBuffer, SwapChainTexture};
 
 
@@ -12,12 +11,10 @@ use super::{camera::Camera, gpu::Instance, gpu::Uniforms, sprite::{DrawSprite, S
 
 
 pub enum GraphicalDisplay {
-    Cpu(Pixels),
     Gpu(GpuState),
 }
 
 pub enum GraphicsMethod {
-    Cpu,
     OpenGL,
     WGPUDefault,
 }
@@ -49,7 +46,6 @@ impl GpuState {
         // The instance is a handle to our GPU
         // BackendBit::PRIMARY => Vulkan + Metal + DX12 + Browser WebGPU
         let backend = match render_mode {
-            GraphicsMethod::Cpu => panic!("WGPU does not support render option: CPU"),
             GraphicsMethod::WGPUDefault => wgpu::BackendBit::PRIMARY,
             GraphicsMethod::OpenGL => wgpu::BackendBit::GL,
         };
@@ -121,8 +117,7 @@ impl GpuState {
             label: Some("uniform_bind_group"),
         });
         // Shaders
-        let vs_module = device.create_shader_module(&wgpu::include_spirv!("../shaders/shader.vert.spv"));
-        let fs_module = device.create_shader_module(&wgpu::include_spirv!("../shaders/shader.frag.spv"));
+        let shader_module = device.create_shader_module(&wgpu::include_spirv!(env!("sprite_shader.spv")));
         let swap_chain = device.create_swap_chain(&surface, &sc_desc);
         let texture_bind_group_layout = device.create_bind_group_layout(
             &wgpu::BindGroupLayoutDescriptor {
@@ -164,13 +159,13 @@ impl GpuState {
             label: Some("Render Pipeline"),
             layout: Some(&render_pipeline_layout),
             vertex: wgpu::VertexState {
-                module: &vs_module,
-                entry_point: "main",
+                module: &shader_module,
+                entry_point: "main_vs",
                 buffers: &[SpriteVertex::desc(), Instance::desc()],
             },
             fragment: Some(wgpu::FragmentState {
-                module: &fs_module,
-                entry_point: "main",
+                module: &shader_module,
+                entry_point: "main_fs",
                 targets: &[wgpu::ColorTargetState {
                     format: sc_desc.format,
                     alpha_blend: BlendState {
