@@ -54,7 +54,7 @@ impl Instance {
             // This means that our shaders will only change to use the next
             // instance when the shader starts processing a new instance
             step_mode: wgpu::InputStepMode::Instance,
-            attributes: &wgpu::vertex_attr_array![5 => Float3, 6 => Float2, 7 => Float2, 8 => Float2],
+            attributes: &wgpu::vertex_attr_array![2 => Float3, 3 => Float2, 4 => Float2, 5 => Float2],
         };
         INSTANCELAYOUT
     }

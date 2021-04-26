@@ -9,27 +9,24 @@ use rodio::buffer::SamplesBuffer;
 use synthrs::wave;
 use wgpu::SwapChainError;
 use winit::window::WindowBuilder;
-use winit::dpi::LogicalSize;
 use winit::event::VirtualKeyCode;
 use winit_input_helper::WinitInputHelper;
 
-use engine2d::{graphics::{gpu::{GAME_HEIGHT, GAME_WIDTH}, graphics::{GraphicalDisplay, GraphicsMethod}, sprite::UpdateSprite}, logic::{collision::{gather_contacts, killed, restitute}, types::*}};
-use engine2d::{audio::audio::{Note, SoundChannels, generate_samples}};
-use engine2d::graphics::tiles::*;
-use engine2d::graphics::animation::*;
-use engine2d::logic::state::*;
-use engine2d::graphics::screen::Screen;
-use engine2d::graphics::maps::{get_start_map, get_empty_map, get_maps};
+use engine3d::{graphics::{gpu::{GAME_HEIGHT, GAME_WIDTH}, graphics::{GraphicalDisplay, GraphicsMethod}, sprite::UpdateSprite}, logic::{collision::{gather_contacts, killed, restitute}, types::*}};
+use engine3d::{audio::audio::{Note, SoundChannels, generate_samples}};
+use engine3d::graphics::tiles::*;
+use engine3d::graphics::animation::*;
+use engine3d::logic::state::*;
+use engine3d::graphics::maps::{get_start_map, get_empty_map, get_maps};
 
 
-// use engine2d::collision::*;
+// use engine3d::collision::*;
 // Imagine a Resources struct (we'll call it AssetDB or Assets in the future)
 // which wraps all accesses to textures, sounds, animations, etc.
-use engine2d::graphics::resources::*;
+use engine3d::graphics::resources::*;
 
 const WIDTH: usize = 480;
 const HEIGHT: usize = 320;
-const DEPTH: usize = 4;
 const MAX_SPEED: i32 = 4;
 const X_SPEED: i32 = 3;
 
@@ -42,7 +39,7 @@ fn main() {
                                 Arg::with_name("backend")
                                     .takes_value(true)
                                     .default_value("opengl")
-                                    .value_names(&["cpu", "opengl", "vulkan"])
+                                    .value_names(&["opengl", "vulkan"])
                                     .help("Set the graphics backend. Options are CPU, OpenGl, or Vulkan / DX12")
                                     .long_help("Sets the graphics backend. Options are CPU, OpenGl, or Vulkan / DX12. 
                                                     The CPU renderer is based on Pixel using bitblt while the other options are based on wgpu.
@@ -51,21 +48,12 @@ fn main() {
                             )
                             .get_matches();
     let render_type = match args.value_of("backend") {
-        Some("cpu") => GraphicsMethod::Cpu,
         Some("opengl") => GraphicsMethod::OpenGL,
         Some("vulkan") => GraphicsMethod::WGPUDefault,
         Some(invalid) => panic!("Invalid backend type: {}", invalid),
         None => panic!("No backend set!")
     };
     let window_builder = match render_type {
-        engine2d::graphics::graphics::GraphicsMethod::Cpu => {
-            let size = LogicalSize::new(WIDTH as f64, HEIGHT as f64);
-            WindowBuilder::new()
-                .with_title("Game 1")
-                .with_inner_size(size)
-                .with_min_inner_size(size)
-                .with_resizable(false)
-        },
         _ => {
             WindowBuilder::new()
                 .with_title("Game 1")
@@ -160,13 +148,12 @@ fn main() {
         seed,
         rng
     });
-    engine2d::run(WIDTH, HEIGHT, window_builder,
+    engine3d::run(WIDTH, HEIGHT, window_builder,
             rsrc, levels, state, render_type, init, draw, update_game);
 }
 
 fn init(_resources:&Resources, levels: &mut Vec<Level>, screen_type: &mut GraphicalDisplay, state: &StateType) -> Result<(), Box<dyn Error>> {
     match screen_type {
-        GraphicalDisplay::Cpu(_) => Ok(()),
         GraphicalDisplay::Gpu(gpu_state) => {
             match state {
                 StateType::Menu(game_state) => {
@@ -185,26 +172,6 @@ fn init(_resources:&Resources, levels: &mut Vec<Level>, screen_type: &mut Graphi
 fn draw_menu(_resources:&Resources,_levelss: &Vec<Level>, state: &GameState,
         screen_type: &mut GraphicalDisplay, _frame:usize) -> Result<(), SwapChainError> {
     match screen_type {
-        GraphicalDisplay::Cpu(pixels) => {
-            let mut screen = Screen::wrap(pixels.get_frame(), WIDTH, HEIGHT, DEPTH, Vec2i(0, 0));
-            screen.clear(Rgba(80, 80, 80, 255));
-            let width = WIDTH as i32;
-            let height = HEIGHT as i32;
-            assert!(state.menu_entry < 2);
-            match state.menu_entry {
-                0 => {
-                    screen.bitblt(&state.textures[1], Rect {x: 0, y:16, w: 64, h: 16}, Vec2i((width-64)/2, (height-16)/2));
-                    screen.bitblt(&state.textures[1], Rect {x: 0, y:32, w: 64, h: 16}, Vec2i((width-64)/2, (height-16)/2 + 16));
-                },
-                1 =>  {
-                    screen.bitblt(&state.textures[1], Rect {x: 0, y:0, w: 64, h: 16}, Vec2i((width-64)/2, (height-16)/2));
-                    screen.bitblt(&state.textures[1], Rect {x: 0, y:48, w: 64, h: 16}, Vec2i((width-64)/2, (height-16)/2 + 16));
-                },
-                _ => {},
-            }
-            pixels.render().unwrap();
-            Ok(())
-        },
         GraphicalDisplay::Gpu(gpu_state) => {
             let _width = WIDTH as i32;
             let _height = HEIGHT as i32;
@@ -241,16 +208,6 @@ fn draw_menu(_resources:&Resources,_levelss: &Vec<Level>, state: &GameState,
 fn draw_game_over(_resources:&Resources,_levelss: &Vec<Level>, state: &GameState,
         screen_type: &mut GraphicalDisplay, _frame:usize) -> Result<(), SwapChainError> {
     match screen_type {
-        GraphicalDisplay::Cpu(pixels) => {
-            let mut screen = Screen::wrap(pixels.get_frame(), WIDTH, HEIGHT, DEPTH, Vec2i(0, 0));
-            screen.clear(Rgba(80, 80, 80, 255));
-            let width = WIDTH as i32;
-            let height = HEIGHT as i32;
-            screen.bitblt(&state.textures[1], Rect {x: 0, y:64, w: 64, h: 16}, Vec2i((width-64)/2, (height-16)/2));
-            screen.bitblt(&state.textures[1], Rect {x: 0, y:80, w: 64, h: 16}, Vec2i((width-64)/2, (height-16)/2 + 16));
-            pixels.render().unwrap();
-            Ok(())
-        },
         GraphicalDisplay::Gpu(gpu_state) => {
             gpu_state.camera.pos = [0.0, 0.0];
             gpu_state.update();
@@ -272,17 +229,6 @@ fn draw_game_over(_resources:&Resources,_levelss: &Vec<Level>, state: &GameState
 fn draw_game(_resources:&Resources, levels: &Vec<Level>, state: &GameState,
         screen_type: &mut GraphicalDisplay, _frame:usize) -> Result<(), SwapChainError> {
     match screen_type {
-        GraphicalDisplay::Cpu(pixels) => {
-            let mut screen = Screen::wrap(pixels.get_frame(), WIDTH, HEIGHT, DEPTH, Vec2i(0, 0));
-            screen.clear(Rgba(80, 80, 80, 255));
-            screen.set_scroll(state.camera);
-            levels[state.level].0.iter().for_each(|map| map.draw(&mut screen));
-            for ((pos,tex),anim) in state.positions.iter().zip(state.textures.iter()).zip(state.anim_state.iter()) {
-                screen.bitblt(tex,anim.frame(),*pos);
-            }
-            pixels.render().unwrap();
-            Ok(())
-        },
         GraphicalDisplay::Gpu(gpu_state) => {
             let player_pos = state.positions[0];
             let camera_pos = gpu_state.camera.pos;
