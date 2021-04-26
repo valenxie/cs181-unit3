@@ -1,5 +1,5 @@
 [package]
-name = "Project-Two-Games"
+name = "cs181-unit3"
 version = "0.1.0"
 authors = ["Nette Mashewske", "Max Rose"]
 edition = "2018"

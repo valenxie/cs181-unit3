@@ -86,13 +86,8 @@ pub fn gather_contacts(
 
 pub fn killed(entity: &Rect, enemies: &[Rect]) -> bool {
     for enemy in enemies {
-        if rect_touching(entity, enemy) {
-            match rect_displacement(entity, enemy) {
-                Some(_) => {
-                    return true;
-                }
-                None => {}
-            }
+        if rect_touching(entity, enemy) && rect_displacement(entity, enemy).is_some() {
+            return true;
         }
     }
     false
