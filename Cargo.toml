@@ -1,8 +1,7 @@
 [workspace]
 members = [
     "engine",
-    "games/game-1",
-    "games/game-2",
+    "games/final-project",
     "shaders/sprites",
 ]
 
