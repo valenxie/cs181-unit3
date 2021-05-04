@@ -6,7 +6,7 @@ edition = "2018"
 
 # Our 3D Game engine dependencies
 [lib]
-crate-type = ["lib"]
+crate-type = ["bin"]
 
 [dependencies]
 winit = "0.24.0"
@@ -28,3 +28,7 @@ features = ["vulkan-portability"]
 
 [dependencies.synthrs]
 git = "https://github.com/gyng/synthrs"
+
+[[bin]]
+name = "final_project"
+path = "src/lib.rs"
