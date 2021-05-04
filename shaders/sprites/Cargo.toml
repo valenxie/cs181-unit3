@@ -10,6 +10,6 @@ edition = "2018"
 crate-type = ["dylib"]
 
 [dependencies]
-spirv-std-macros = "0.4.0-alpha.5"
-spirv-std = "0.4.0-alpha.5"
+spirv-std-macros = "0.4.0-alpha.7"
+spirv-std = "0.4.0-alpha.7"
 glam = {version = "0.14", default-features = false, features = ["libm", "scalar-math", "spirv-std"]}
