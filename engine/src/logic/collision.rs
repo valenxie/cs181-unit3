@@ -1,5 +1,4 @@
 use core::f32;
-
 use crate::graphics::animation::AnimationState;
 use crate::logic::{
     geom::*,
