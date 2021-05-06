@@ -1,8 +1,10 @@
 [workspace]
 members = [
-    "engine",
+    "engine3d",
     "games/final-project",
     "shaders/sprites",
+    "shaders/model",
+    "shaders/bones",
 ]
 
 # Enable incremental by default in release mode.
