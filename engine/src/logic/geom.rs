@@ -24,6 +24,13 @@ pub struct Block {
     pub L: f32,
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Box {
+    dim: Vec3,
+    pos_vertex: Vec3,
+    corners: [Vec3;8],
+}
+
 /// Are s1 and s2 touching?
 #[allow(dead_code)]
 pub fn touching_sphere_sphere(s1: &Sphere, s2: &Sphere) -> bool {

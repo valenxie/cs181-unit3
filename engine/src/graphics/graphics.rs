@@ -7,7 +7,7 @@ use wgpu::{BindGroupLayout, BlendFactor, BlendOperation, BlendState, CommandBuff
 use winit::window::Window;
 use wgpu::util::DeviceExt;
 
-use super::{camera::Camera, gpu::Instance, gpu::Uniforms, sprite::{DrawSprite, Sprite}, texture::{CpuTexture, TextureHandle}, tiles::{DrawTilemap, Tilemap, TilemapHandle}, vertex::SpriteVertex, vertex::Vertex};
+use super::{camera::Camera,camera_control::CameraController, gpu::Instance, gpu::Uniforms, sprite::{DrawSprite, Sprite}, texture::{CpuTexture, TextureHandle}, tiles::{DrawTilemap, Tilemap, TilemapHandle}, vertex::SpriteVertex, vertex::Vertex};
 
 
 pub enum GraphicalDisplay {
@@ -29,6 +29,7 @@ pub struct GpuState {
     pub clear_color: wgpu::Color,
     render_pipeline: wgpu::RenderPipeline,
     pub camera: Camera,
+    pub camera_controller: CameraController,
     uniforms: Uniforms,
     uniform_buffer: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
@@ -76,10 +77,16 @@ impl GpuState {
         };
         let depth_texture = TextureHandle::create_depth_texture(&device, &sc_desc, "depth_texture");
         let camera = Camera {
-            // position the camera one unit up and 2 units back
-            // +z is out of the screen
-            pos: [0.0,0.0]
+            eye: (0.0, 5.0, -10.0).into(),
+            target: (0.0, 0.0, 0.0).into(),
+            up: cgmath::Vector3::unit_y(),
+            aspect: sc_desc.width as f32 / sc_desc.height as f32,
+            fovy: 45.0,
+            znear: 0.1,
+            zfar: 200.0,
         };
+
+        let camera_controller = CameraController::new(0.2);
 
         let mut uniforms = Uniforms::new();
         uniforms.update_view_proj(&camera);
@@ -217,6 +224,7 @@ impl GpuState {
             size,
             clear_color: wgpu::Color {r:0.0, g:0.0, b:0.0, a:1.0},
             camera,
+            camera_controller,
             uniforms,
             uniform_buffer,
             uniform_bind_group,
@@ -312,6 +320,53 @@ impl GpuState {
         }
         // submit will accept anything that implements IntoIter
         Ok(encoder.finish())
+    }
+
+    pub fn render(&mut self) -> Result<(), wgpu::SwapChainError> {
+        let frame = self.swap_chain.get_current_frame()?.output;
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Encoder"),
+            });
+        {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("Render Pass"),
+                color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
+                    attachment: &frame.view,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.1,
+                            g: 0.2,
+                            b: 0.3,
+                            a: 1.0,
+                        }),
+                        store: true,
+                    },
+                }],
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachmentDescriptor {
+                    attachment: &self.depth_texture.view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: true,
+                    }),
+                    stencil_ops: None,
+                }),
+            });
+            render_pass.set_vertex_buffer(1, self.instance_buffer.slice(..));
+            render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.draw_model_instanced(
+                &self.obj_model,
+                0..self.instances.len() as u32,
+                &self.uniform_bind_group,
+            );
+        }
+
+        // submit will accept anything that implements IntoIter
+        self.queue.submit(std::iter::once(encoder.finish()));
+
+        Ok(())
     }
 
     pub fn clear_screen(&mut self) -> Result<(CommandBuffer, SwapChainTexture), wgpu::SwapChainError> {

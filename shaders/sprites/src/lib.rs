@@ -28,6 +28,7 @@ pub fn main_fs(
 }
 
 #[spirv(vertex)]
+#[deny(clippy::too_many_arguments)]
 pub fn main_vs(
     a_position: Vec3,
     a_tex_coords: Vec2,

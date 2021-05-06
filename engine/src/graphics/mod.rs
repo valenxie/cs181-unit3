@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod camera;
+pub mod camera_control;
 pub mod graphics;
 pub mod texture;
 pub mod tiles;
