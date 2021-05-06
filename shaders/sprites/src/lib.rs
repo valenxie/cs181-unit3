@@ -11,7 +11,7 @@
 #[macro_use]
 pub extern crate spirv_std_macros;
 use glam::{Vec2, Vec3, Vec4};
-use spirv_std::{Image2d, Sampler, discard};
+use spirv_std::{discard, Image2d, Sampler};
 
 #[spirv(fragment)]
 pub fn main_fs(
@@ -20,7 +20,7 @@ pub fn main_fs(
     #[spirv(descriptor_set = 0, binding = 1)] s_diffuse: &Sampler,
     output: &mut Vec4,
 ) {
-    let texel : Vec4 = t_diffuse.sample(*s_diffuse, v_tex_coords);
+    let texel: Vec4 = t_diffuse.sample(*s_diffuse, v_tex_coords);
     if texel.w < 0.5 {
         discard();
     }
@@ -36,10 +36,11 @@ pub fn main_vs(
     a_pos_scale: Vec2,
     a_tex_offset: Vec2,
     a_tex_scale: Vec2,
-    #[spirv(uniform, descriptor_set=1, binding=0)] camera_pos: &Vec2,
+    #[spirv(uniform, descriptor_set = 1, binding = 0)] camera_pos: &Vec2,
     #[spirv(position)] out_pos: &mut Vec4,
     v_tex_coords: &mut Vec2,
 ) {
     *v_tex_coords = (a_tex_coords * a_tex_scale) + a_tex_offset;
-    *out_pos = (a_position  * a_pos_scale.extend(1.0) + pos_offset - camera_pos.extend(0.0)).extend(1.0);
+    *out_pos =
+        (a_position * a_pos_scale.extend(1.0) + pos_offset - camera_pos.extend(0.0)).extend(1.0);
 }

@@ -1,14 +1,14 @@
 use core::f32;
 
-use cgmath::{Vector3, num_traits::{Pow}, vec3};
-use crate::graphics::{animation::AnimationState, tiles::Tilemap};
+use crate::graphics::animation::AnimationState;
 use crate::logic::{
+    geom::*,
     state::{EntityAnims, EntityState},
     types::*,
-    geom::*
 };
+use cgmath::{num_traits::Pow, vec3, Vector3};
 
-const SAMPLE_DENSITY:f32 = 1.0;
+const SAMPLE_DENSITY: f32 = 1.0;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Contact<T: Copy> {
@@ -41,24 +41,33 @@ impl Contacts {
 }
 
 // return a unit vector pointing from marble 1 to marble 2, i.e. contact normal
-fn direction(marble1: &Marble, marble2: &Marble) -> Vector3<f32>{
-    let mut disp =vec3(marble2.body.c.x-marble1.body.c.x, marble2.body.c.y-marble1.body.c.y, marble2.body.c.z-marble1.body.c.z);
-    let coef = (disp.x*disp.x+disp.y*disp.y+disp.z*disp.z).sqrt();
-    disp*coef
+fn direction(marble1: &Marble, marble2: &Marble) -> Vector3<f32> {
+    let mut disp = vec3(
+        marble2.body.c.x - marble1.body.c.x,
+        marble2.body.c.y - marble1.body.c.y,
+        marble2.body.c.z - marble1.body.c.z,
+    );
+    let coef = (disp.x * disp.x + disp.y * disp.y + disp.z * disp.z).sqrt();
+    disp * coef
 }
 
 // half the sum of momentum, abs value
-fn avg_momentum(marble1: &Marble,marble2: &Marble, direction:Vector3<f32>) -> f32{
+fn avg_momentum(marble1: &Marble, marble2: &Marble, direction: Vector3<f32>) -> f32 {
     //let mut direction = direction(marble1, marble2);
     //marble1 velocity along direction of direction:
-    let mut v1 = direction.x*marble1.velocity.x+direction.y*marble1.velocity.y+direction.y*marble1.velocity.y;
-    v1 /= (direction.x.powf(2.0)+direction.y.powf(2.0)+direction.z.pow(2.0)).sqrt();
+    let mut v1 = direction.x * marble1.velocity.x
+        + direction.y * marble1.velocity.y
+        + direction.y * marble1.velocity.y;
+    v1 /= (direction.x.powf(2.0) + direction.y.powf(2.0) + direction.z.pow(2.0)).sqrt();
     //marble1 velocity along direction of direction:
-    let mut v2 = direction.x*marble2.velocity.x+direction.y*marble2.velocity.y+direction.y*marble2.velocity.y;
-    v2 /= (direction.x.powf(2.0)+direction.y.powf(2.0)+direction.z.pow(2.0)).sqrt();
+    let mut v2 = direction.x * marble2.velocity.x
+        + direction.y * marble2.velocity.y
+        + direction.y * marble2.velocity.y;
+    v2 /= (direction.x.powf(2.0) + direction.y.powf(2.0) + direction.z.pow(2.0)).sqrt();
     //safe to say that v2 is negative
-    let sum_momentum = marble1.mass(SAMPLE_DENSITY)*v1.abs() + marble2.mass(SAMPLE_DENSITY)*v2.abs();
-    sum_momentum*0.5
+    let sum_momentum =
+        marble1.mass(SAMPLE_DENSITY) * v1.abs() + marble2.mass(SAMPLE_DENSITY) * v2.abs();
+    sum_momentum * 0.5
 }
 
 pub fn update(walls: &[Wall], marbles: &mut [Marble], contacts: &mut Contacts) {

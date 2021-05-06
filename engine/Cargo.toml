@@ -24,6 +24,7 @@ futures = "0.3"
 bytemuck = { version = "1.4", features = [ "derive" ] }
 anyhow = "1.0"
 clap = "2.33.3"
+tobj = "2.0"
 
 [dependencies.wgpu]
 version = "0.7.0"

@@ -1,15 +1,15 @@
 use std::rc::Rc;
-use std::{
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
-use crate::{audio::audio::SoundChannels, graphics::{
-    animation::{Animation, AnimationState},
-    texture::CpuTexture,
-    tiles::Tilemap,
-}};
 use crate::logic::types::{Rect, Vec2i};
-use rand::{StdRng};
+use crate::{
+    audio::audio::SoundChannels,
+    graphics::{
+        animation::{Animation, AnimationState},
+        texture::CpuTexture,
+    },
+};
+use rand::StdRng;
 
 #[derive(Clone)]
 pub enum StateType {
@@ -25,7 +25,6 @@ pub enum EntityType {
 }
 
 pub type Level = (
-    Vec<Tilemap>,
     Vec<(EntityType, i32, i32)>,
     Vec<Vec<usize>>,
     Vec<usize>,

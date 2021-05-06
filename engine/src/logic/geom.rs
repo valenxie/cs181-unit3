@@ -1,5 +1,5 @@
-use std::{f32::consts::PI};
 pub use cgmath::prelude::*;
+use std::f32::consts::PI;
 pub type Vec3 = cgmath::Vector3<f32>;
 pub type Pos3 = cgmath::Point3<f32>;
 pub type Mat4 = cgmath::Matrix4<f32>;
@@ -19,16 +19,16 @@ pub struct Plane {
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Block {
     pub pos_vertex: Vec3,
-    pub W: f32,
-    pub H: f32,
-    pub L: f32,
+    pub w: f32,
+    pub h: f32,
+    pub l: f32,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Box {
     dim: Vec3,
     pos_vertex: Vec3,
-    corners: [Vec3;8],
+    corners: [Vec3; 8],
 }
 
 /// Are s1 and s2 touching?

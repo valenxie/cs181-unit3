@@ -1,4 +1,6 @@
 use cgmath::prelude::*;
+use engine::graphics::{camera::*, gpu::Uniforms, graphics::State, texture, vertex};
+use engine::logic::{collision, geom::*};
 use rand;
 use std::{f32::consts::PI, iter};
 use wgpu::util::DeviceExt;
@@ -7,11 +9,6 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::Window,
 };
-use engine::logic::{collision,geom::*};
-use engine::graphics::{camera::*,texture,vertex,gpu::Uniforms,graphics::GpuState};
-
-
-
 
 const NUM_MARBLES: usize = 50;
 
@@ -85,14 +82,14 @@ impl Marble {
         }
     }
     fn update(&mut self, g: f32) {
-        self.velocity += Vec3::new(0.0, -g * (1.0+(self.body.r - 0.1)*0.5), 0.0) * DT;
+        self.velocity += Vec3::new(0.0, -g * (1.0 + (self.body.r - 0.1) * 0.5), 0.0) * DT;
         self.body.c += self.velocity * DT;
     }
 
-    fn mass(&self,density:f32) -> f32{
+    fn mass(&self, density: f32) -> f32 {
         //V=4/3pi*r^3
-        let volume = (4.0/3.0)*PI*(self.body.r*self.body.r*self.body.r);
-        volume*density
+        let volume = (4.0 / 3.0) * PI * (self.body.r * self.body.r * self.body.r);
+        volume * density
     }
 }
 
@@ -158,7 +155,6 @@ impl Wall {
     }
 }
 
-
 fn main() {
     use std::time::Instant;
     env_logger::init();
@@ -169,7 +165,10 @@ fn main() {
         .build(&event_loop)
         .unwrap();
     use futures::executor::block_on;
-    let mut gpu_state = block_on(GpuState::new(&window,engine::graphics::graphics::GraphicsMethod::WGPUDefault));
+    let mut gpu_state = block_on(State::new(
+        &window,
+        engine::graphics::graphics::GraphicsMethod::WGPUDefault,
+    ));
     //let mut state = block_on(State::new(&window));
 
     // How many frames have we simulated?
