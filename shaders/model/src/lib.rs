@@ -133,6 +133,8 @@ pub fn main_vs(
     a_position: Vec3,
     a_tex_coords: Vec2,
     a_normal: Vec3,
+    bone_ids: u32,
+    bone_weights: Vec4,
     model_matrix_0: Vec4,
     model_matrix_1: Vec4,
     model_matrix_2: Vec4,

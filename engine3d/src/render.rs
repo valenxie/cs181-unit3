@@ -336,7 +336,7 @@ impl Render {
                 },
                 fragment: Some(wgpu::FragmentState {
                     module: &static_module,
-                    entry_point: "main_vs",
+                    entry_point: "main_fs",
                     targets: &[wgpu::ColorTargetState {
                         format: sc_desc.format,
                         alpha_blend: wgpu::BlendState::REPLACE,
