@@ -12,3 +12,7 @@ env_logger = "0.7"
 rand = "0.8.3"
 winit = "0.24.0"
 cgmath = "0.18"
+
+[[bin]]
+name = "final_project"
+path = "src/lib.rs"
